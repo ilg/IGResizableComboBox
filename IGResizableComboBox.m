@@ -35,6 +35,8 @@
 
 #define RESIZE_HANDLE_HEIGHT 5
 
+#define NSCOMBOBOX_ITEM_PADDING 2.0
+
 #pragma mark -
 #pragma mark Private helper class's interface
 @interface IGResizableComboBoxPopUpContentView : NSView {
@@ -204,7 +206,7 @@ BOOL draggingNow;
 		delta_y = windowFrame.size.height - previousHeight;
 		windowFrame.origin.y -= delta_y;
 		[popup setFrame:windowFrame display:YES];
-		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/[theComboBox itemHeight]);
+		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/([theComboBox itemHeight] + NSCOMBOBOX_ITEM_PADDING));
 		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
 	}
 	previousDragLocation = newLocation;
