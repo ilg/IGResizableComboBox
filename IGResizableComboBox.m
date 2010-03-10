@@ -164,16 +164,18 @@ IGResizableComboBoxPopUpContentView *innerView;
 
 @implementation IGResizableComboBoxPopUpContentView
 
+#define SIGNUM(f) ((f) / fabs(f))
+
 @synthesize theComboBox;
 
-NSPoint previousDragLocation;
+CGFloat draggingBasisY;
 BOOL draggingNow;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-		previousDragLocation = NSZeroPoint;
+		draggingBasisY = 0.0;
 		draggingNow = NO;
 		[self setTheComboBox:nil];
     }
@@ -182,34 +184,38 @@ BOOL draggingNow;
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-	previousDragLocation = [NSEvent mouseLocation];
+	draggingBasisY = [NSEvent mouseLocation].y;
 	draggingNow = YES;
 	[[NSCursor resizeUpDownCursor] push];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-	previousDragLocation = NSZeroPoint;
+	draggingBasisY = 0.0;
 	draggingNow = NO;
 	[NSCursor pop];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-	NSPoint newLocation = [NSEvent mouseLocation];
-	CGFloat delta_y = previousDragLocation.y - newLocation.y;
-	if (fabs(delta_y) > 0.1) {
+	CGFloat newY = [NSEvent mouseLocation].y;
+	CGFloat realItemHeight = [theComboBox itemHeight] + NSCOMBOBOX_ITEM_PADDING;
+	if (fabs(draggingBasisY - newY) > realItemHeight/2) {
+		// if we're a bit more than half-way to a change of one item height, then we actually resize
+		CGFloat delta_y = SIGNUM(draggingBasisY - newY) * realItemHeight;
+		draggingBasisY -= delta_y;
+		
 		NSWindow *popup = [self window];
 		NSRect windowFrame = [popup frame];
 		CGFloat previousHeight = windowFrame.size.height;
-		windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + [theComboBox itemHeight]);
+		windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + realItemHeight);
 		delta_y = windowFrame.size.height - previousHeight;
 		windowFrame.origin.y -= delta_y;
 		[popup setFrame:windowFrame display:YES];
-		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/([theComboBox itemHeight] + NSCOMBOBOX_ITEM_PADDING));
+		
+		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/realItemHeight);
 		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
 	}
-	previousDragLocation = newLocation;
 }
 
 @end
