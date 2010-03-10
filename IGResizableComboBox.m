@@ -35,8 +35,6 @@
 
 #define RESIZE_HANDLE_HEIGHT 5
 
-#define NSCOMBOBOX_ITEM_PADDING 2.0
-
 #pragma mark -
 #pragma mark Private helper class's interface
 @interface IGResizableComboBoxPopUpContentView : NSView {
@@ -199,7 +197,7 @@ BOOL draggingNow;
 - (void)mouseDragged:(NSEvent *)theEvent
 {
 	CGFloat newY = [NSEvent mouseLocation].y;
-	CGFloat realItemHeight = [theComboBox itemHeight] + NSCOMBOBOX_ITEM_PADDING;
+	CGFloat realItemHeight = [theComboBox itemHeight] + [theComboBox intercellSpacing].height;
 	if (fabs(draggingBasisY - newY) > realItemHeight/2) {
 		// if we're a bit more than half-way to a change of one item height, then we actually resize
 		CGFloat delta_y = SIGNUM(draggingBasisY - newY) * realItemHeight;
