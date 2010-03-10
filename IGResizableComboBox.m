@@ -82,8 +82,8 @@ BOOL draggingNow;
 - (void)mouseDragged:(NSEvent *)theEvent
 {
 	NSPoint newLocation = [NSEvent mouseLocation];
-	if (newLocation.y != previousDragLocation.y) {
-		CGFloat delta_y = previousDragLocation.y - newLocation.y;
+	CGFloat delta_y = previousDragLocation.y - newLocation.y;
+	if (fabs(delta_y) > 0.1) {
 		NSWindow *popup = [self window];
 		NSRect windowFrame = [popup frame];
 		CGFloat previousHeight = windowFrame.size.height;
