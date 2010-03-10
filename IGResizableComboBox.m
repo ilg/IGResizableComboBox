@@ -58,7 +58,7 @@
 IGResizableComboBoxPopUpContentView *innerView;
 
 - (id)initWithFrame:(NSRect)frame {
-	NSLog(@"initWithFrame:");
+//	NSLog(@"initWithFrame:");
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
@@ -133,8 +133,7 @@ IGResizableComboBoxPopUpContentView *innerView;
 
 - (void)setNumberOfVisibleItemsAutosaveName:(NSString *)name
 {
-	DLOG(@"hi");
-	NSLog(@"changing combobox length autosave name from '%@' to '%@'",numberOfVisibleItemsAutosaveName,name);
+//	NSLog(@"changing combobox length autosave name from '%@' to '%@'",numberOfVisibleItemsAutosaveName,name);
 	[numberOfVisibleItemsAutosaveName release];
 	numberOfVisibleItemsAutosaveName = [name copy];
 	[self setNumberOfVisibleItems:[[NSUserDefaults standardUserDefaults] integerForKey:numberOfVisibleItemsAutosaveName]];
