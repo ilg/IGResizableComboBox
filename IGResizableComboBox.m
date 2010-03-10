@@ -36,7 +36,7 @@
 #define RESIZE_HANDLE_HEIGHT 5
 
 #pragma mark -
-#pragma mark Private helper class
+#pragma mark Private helper class's interface
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	NSComboBox *theComboBox;
 }
@@ -47,61 +47,9 @@
 
 @end
 
-@implementation IGResizableComboBoxPopUpContentView
-
-@synthesize theComboBox;
-
-NSPoint previousDragLocation;
-BOOL draggingNow;
-
-- (id)initWithFrame:(NSRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code here.
-		previousDragLocation = NSZeroPoint;
-		draggingNow = NO;
-		[self setTheComboBox:nil];
-    }
-    return self;
-}
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-	previousDragLocation = [NSEvent mouseLocation];
-	draggingNow = YES;
-	[[NSCursor resizeUpDownCursor] push];
-}
-
-- (void)mouseUp:(NSEvent *)theEvent
-{
-	previousDragLocation = NSZeroPoint;
-	draggingNow = NO;
-	[NSCursor pop];
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent
-{
-	NSPoint newLocation = [NSEvent mouseLocation];
-	CGFloat delta_y = previousDragLocation.y - newLocation.y;
-	if (fabs(delta_y) > 0.1) {
-		NSWindow *popup = [self window];
-		NSRect windowFrame = [popup frame];
-		CGFloat previousHeight = windowFrame.size.height;
-		windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + [theComboBox itemHeight]);
-		delta_y = windowFrame.size.height - previousHeight;
-		windowFrame.origin.y -= delta_y;
-		[popup setFrame:windowFrame display:YES];
-		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/[theComboBox itemHeight]);
-		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
-	}
-	previousDragLocation = newLocation;
-}
-
-@end
-
 
 #pragma mark -
-#pragma mark main class
+#pragma mark main class implementation
 
 @implementation IGResizableComboBox
 
@@ -115,6 +63,7 @@ IGResizableComboBoxPopUpContentView *innerView;
     if (self) {
         // Initialization code here.
 		[self awakeFromNib];
+		[self setNumberOfVisibleItemsAutosaveName:nil];
     }
     return self;
 }
@@ -174,6 +123,23 @@ IGResizableComboBoxPopUpContentView *innerView;
 	}
 }
 
+- (void)setNumberOfVisibleItems:(NSInteger)visibleItems
+{
+	[super setNumberOfVisibleItems:visibleItems];
+	if (numberOfVisibleItemsAutosaveName) {
+		[[NSUserDefaults standardUserDefaults] setInteger:visibleItems forKey:numberOfVisibleItemsAutosaveName];
+	}
+}
+
+- (void)setNumberOfVisibleItemsAutosaveName:(NSString *)name
+{
+	DLOG(@"hi");
+	NSLog(@"changing combobox length autosave name from '%@' to '%@'",numberOfVisibleItemsAutosaveName,name);
+	[numberOfVisibleItemsAutosaveName release];
+	numberOfVisibleItemsAutosaveName = [name copy];
+	[self setNumberOfVisibleItems:[[NSUserDefaults standardUserDefaults] integerForKey:numberOfVisibleItemsAutosaveName]];
+}
+
 
 - (void)willPopUp:(NSNotification *)notification
 {
@@ -187,6 +153,62 @@ IGResizableComboBoxPopUpContentView *innerView;
 	[[innerView window] setContentView:scrollView];
 //	NSLog(@"willDismiss:");
 	[self setIsPopUpOpen:NO];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark Private helper class's implementation
+
+@implementation IGResizableComboBoxPopUpContentView
+
+@synthesize theComboBox;
+
+NSPoint previousDragLocation;
+BOOL draggingNow;
+
+- (id)initWithFrame:(NSRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code here.
+		previousDragLocation = NSZeroPoint;
+		draggingNow = NO;
+		[self setTheComboBox:nil];
+    }
+    return self;
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	previousDragLocation = [NSEvent mouseLocation];
+	draggingNow = YES;
+	[[NSCursor resizeUpDownCursor] push];
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+	previousDragLocation = NSZeroPoint;
+	draggingNow = NO;
+	[NSCursor pop];
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+	NSPoint newLocation = [NSEvent mouseLocation];
+	CGFloat delta_y = previousDragLocation.y - newLocation.y;
+	if (fabs(delta_y) > 0.1) {
+		NSWindow *popup = [self window];
+		NSRect windowFrame = [popup frame];
+		CGFloat previousHeight = windowFrame.size.height;
+		windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + [theComboBox itemHeight]);
+		delta_y = windowFrame.size.height - previousHeight;
+		windowFrame.origin.y -= delta_y;
+		[popup setFrame:windowFrame display:YES];
+		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/[theComboBox itemHeight]);
+		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
+	}
+	previousDragLocation = newLocation;
 }
 
 @end

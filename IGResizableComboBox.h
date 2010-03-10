@@ -36,8 +36,11 @@
 
 @interface IGResizableComboBox : NSComboBox {
 	BOOL isPopUpOpen;
+	NSString *numberOfVisibleItemsAutosaveName;
 }
 
 @property BOOL isPopUpOpen;
+
+- (void)setNumberOfVisibleItemsAutosaveName:(NSString *)name;
 
 @end
