@@ -97,6 +97,19 @@ IGResizableComboBoxPopUpContentView *innerView;
 	return child;
 }
 
+- (BOOL)isPopUpBelow
+{
+	// this seems to work fine in simplistic testing, but fails in asLJ (something to do with the NSDrawer or the InspectorKit stuff?)
+	return ([self isPopUpOpen] && 
+			([[self comboBoxPopUpWindow] frame].origin.y < [[self window] convertBaseToScreen:[self frame].origin].y)
+			);
+}
+
+- (BOOL)isPopUpAbove
+{
+	return [self isPopUpOpen] && ![self isPopUpBelow];
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     // Drawing code here.
 	[super drawRect:dirtyRect];
@@ -105,6 +118,13 @@ IGResizableComboBoxPopUpContentView *innerView;
 		NSWindow *child = [self comboBoxPopUpWindow];
 		if (child) {
 			NSRect windowFrame = [child frame];
+//			NSLog(@"window frame y: %f; self frame y in base coord: %f",
+//				  windowFrame.origin.y,
+//				  [[self window] convertBaseToScreen:[self frame].origin].y);
+//			NSLog(@"window frame y in self window base: %f; self frame y: %f",
+//				  [[self window] convertScreenToBase:windowFrame.origin].y,
+//				  [self frame].origin.y);
+//			NSLog(@"pop-up is %@",[self isPopUpBelow] ? @"below" : ([self isPopUpAbove] ? @"above" : @"neither above nor below"));
 			NSScrollView *scrollView = [child contentView];
 			NSRect scrollViewFrame = [scrollView frame];
 			
