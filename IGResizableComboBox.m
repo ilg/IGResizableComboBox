@@ -39,6 +39,9 @@
 #pragma mark Private helper class's interface
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	NSComboBox *theComboBox;
+	
+	CGFloat draggingBasisY;
+	BOOL draggingNow;
 }
 
 @property(retain) NSComboBox *theComboBox;
@@ -54,8 +57,6 @@
 @implementation IGResizableComboBox
 
 @synthesize isPopUpOpen;
-
-IGResizableComboBoxPopUpContentView *innerView;
 
 - (id)initWithFrame:(NSRect)frame {
 //	NSLog(@"initWithFrame:");
@@ -165,9 +166,6 @@ IGResizableComboBoxPopUpContentView *innerView;
 #define SIGNUM(f) ((f) / fabs(f))
 
 @synthesize theComboBox;
-
-CGFloat draggingBasisY;
-BOOL draggingNow;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
