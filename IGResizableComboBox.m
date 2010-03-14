@@ -131,6 +131,8 @@
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
 			
+			[innerView addCursorRect:[innerView bounds] cursor:[NSCursor resizeUpDownCursor]];
+			
 			IGResizableComboBoxPopUpHandleImageView *imV = [[IGResizableComboBoxPopUpHandleImageView alloc]
 															initWithFrame:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2, 1.0,
 																					 RESIZE_HANDLE_IMAGE_WIDTH, RESIZE_HANDLE_IMAGE_HEIGHT)];
@@ -217,8 +219,9 @@
 	CGFloat newY = [NSEvent mouseLocation].y;
 	CGFloat realItemHeight = [theComboBox itemHeight] + [theComboBox intercellSpacing].height;
 	if (fabs(draggingBasisY - newY) > realItemHeight/2) {
-		// if we're a bit more than half-way to a change of one item height, then we actually resize
-		CGFloat delta_y = SIGNUM(draggingBasisY - newY) * realItemHeight;
+		// if we're more than half-way to a change of one item height, then we actually resize
+		CGFloat delta_y = realItemHeight * MAX(1 - [theComboBox numberOfVisibleItems],
+											   round((draggingBasisY - newY) / realItemHeight));
 		draggingBasisY -= delta_y;
 		
 		NSWindow *popup = [self window];
