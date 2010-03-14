@@ -35,8 +35,12 @@
 
 #define RESIZE_HANDLE_HEIGHT 5
 
+#define RESIZE_HANDLE_IMAGE_HEIGHT (RESIZE_HANDLE_HEIGHT - 1.0)
+#define RESIZE_HANDLE_IMAGE_WIDTH 30.0
+
 #pragma mark -
 #pragma mark Private helper class's interface
+
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	NSComboBox *theComboBox;
 	
@@ -45,6 +49,13 @@
 }
 
 @property(retain) NSComboBox *theComboBox;
+
+//<#methods#>
+
+@end
+
+@interface IGResizableComboBoxPopUpHandleImageView : NSImageView {
+}
 
 //<#methods#>
 
@@ -119,6 +130,15 @@
 			[child setContentView:innerView];
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
+			
+			IGResizableComboBoxPopUpHandleImageView *imV = [[IGResizableComboBoxPopUpHandleImageView alloc]
+															initWithFrame:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2, 1.0,
+																					 RESIZE_HANDLE_IMAGE_WIDTH, RESIZE_HANDLE_IMAGE_HEIGHT)];
+			NSImage *image = [NSImage imageNamed:@"NSListViewTemplate"];
+			[image setSize:NSMakeSize(RESIZE_HANDLE_IMAGE_WIDTH,RESIZE_HANDLE_IMAGE_HEIGHT)];
+			[imV setImage:image];
+			[imV setNextResponder:innerView];
+			[innerView addSubview:imV];
 		}
 	} else {
 	}
@@ -212,6 +232,25 @@
 		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/realItemHeight);
 		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
 	}
+}
+
+@end
+
+@implementation IGResizableComboBoxPopUpHandleImageView
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	[[self superview] mouseDown:theEvent];
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+	[[self superview] mouseUp:theEvent];
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+	[[self superview] mouseDragged:theEvent];
 }
 
 @end
