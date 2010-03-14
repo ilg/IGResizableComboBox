@@ -137,7 +137,6 @@
 			NSImage *image = [NSImage imageNamed:@"NSListViewTemplate"];
 			[image setSize:NSMakeSize(RESIZE_HANDLE_IMAGE_WIDTH,RESIZE_HANDLE_IMAGE_HEIGHT)];
 			[imV setImage:image];
-			[imV setNextResponder:innerView];
 			[innerView addSubview:imV];
 		}
 	} else {
