@@ -33,9 +33,9 @@
 
 #import "IGResizableComboBox.h"
 
-#define RESIZE_HANDLE_HEIGHT 5
+#define RESIZE_HANDLE_HEIGHT 7.0
 
-#define RESIZE_HANDLE_IMAGE_HEIGHT (RESIZE_HANDLE_HEIGHT - 1.0)
+#define RESIZE_HANDLE_IMAGE_HEIGHT 1.0
 #define RESIZE_HANDLE_IMAGE_WIDTH 30.0
 
 #pragma mark -
@@ -132,10 +132,21 @@
 			[scrollView setFrame:scrollViewFrame];
 			
 			IGResizableComboBoxPopUpHandleImageView *imV = [[IGResizableComboBoxPopUpHandleImageView alloc]
-															initWithFrame:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2, 1.0,
-																					 RESIZE_HANDLE_IMAGE_WIDTH, RESIZE_HANDLE_IMAGE_HEIGHT)];
-			NSImage *image = [NSImage imageNamed:@"NSListViewTemplate"];
-			[image setSize:NSMakeSize(RESIZE_HANDLE_IMAGE_WIDTH,RESIZE_HANDLE_IMAGE_HEIGHT)];
+															initWithFrame:NSMakeRect(0.0, 0.0,
+																					 windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+			NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+			[image lockFocus];
+			[[NSColor controlShadowColor] set];
+			[NSBezierPath fillRect:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2,
+											  (RESIZE_HANDLE_HEIGHT - RESIZE_HANDLE_IMAGE_HEIGHT)/2,
+											  RESIZE_HANDLE_IMAGE_WIDTH,
+											  RESIZE_HANDLE_IMAGE_HEIGHT)];
+			[[NSColor headerColor] set];
+			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, 0.0)
+									  toPoint:NSMakePoint(windowFrame.size.width, 0.0)];
+			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, RESIZE_HANDLE_HEIGHT)
+									  toPoint:NSMakePoint(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+			[image unlockFocus];
 			[imV setImage:image];
 			[innerView addSubview:imV];
 		}
