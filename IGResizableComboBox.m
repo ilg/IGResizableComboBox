@@ -131,10 +131,14 @@
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
 			
-			IGResizableComboBoxPopUpHandleImageView *imV = [[IGResizableComboBoxPopUpHandleImageView alloc]
-															initWithFrame:NSMakeRect(0.0, 0.0,
-																					 windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
-			NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+			IGResizableComboBoxPopUpHandleImageView *imV;
+			imV = [[[IGResizableComboBoxPopUpHandleImageView alloc]
+					initWithFrame:NSMakeRect(0.0, 0.0,
+											 windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
+				   autorelease];
+			NSImage *image = [[[NSImage alloc]
+							   initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
+							  autorelease];
 			[image lockFocus];
 			[[NSColor controlShadowColor] set];
 			[NSBezierPath fillRect:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2,
