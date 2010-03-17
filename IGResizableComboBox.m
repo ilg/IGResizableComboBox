@@ -42,7 +42,7 @@
 #pragma mark Private helper class's interface
 
 @interface IGResizableComboBoxPopUpContentView : NSView {
-	NSComboBox *theComboBox;
+	IGResizableComboBox *theComboBox;
 	
 	CGFloat draggingBasisY;
 	BOOL draggingNow;
@@ -139,15 +139,20 @@
 			NSRect windowFrame = [child frame];
 			NSScrollView *scrollView = [child contentView];
 			NSRect scrollViewFrame = [scrollView frame];
+			NSRect handleImageViewFrame;
 			
 			windowFrame.size.height += RESIZE_HANDLE_HEIGHT;
 			
 			if ([self isPopUpAbove]) {
 				// the pop-up is above
+				handleImageViewFrame = NSMakeRect(0.0, windowFrame.size.height - RESIZE_HANDLE_HEIGHT, // TODO: fix
+												  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
 			} else {
 				// the pop-up is not above
 				windowFrame.origin.y -= RESIZE_HANDLE_HEIGHT;
 				scrollViewFrame.origin.y += RESIZE_HANDLE_HEIGHT;
+				handleImageViewFrame = NSMakeRect(0.0, 0.0,
+												  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
 			}
 
 			[child setFrame:windowFrame display:YES];
@@ -158,11 +163,10 @@
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
 			
-			IGResizableComboBoxPopUpHandleImageView *imV;
-			imV = [[[IGResizableComboBoxPopUpHandleImageView alloc]
-					initWithFrame:NSMakeRect(0.0, 0.0,
-											 windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
-				   autorelease];
+			IGResizableComboBoxPopUpHandleImageView *handleImageView;
+			handleImageView = [[[IGResizableComboBoxPopUpHandleImageView alloc]
+								initWithFrame:handleImageViewFrame]
+							   autorelease];
 			NSImage *image = [[[NSImage alloc]
 							   initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
 							  autorelease];
@@ -178,8 +182,8 @@
 			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, RESIZE_HANDLE_HEIGHT)
 									  toPoint:NSMakePoint(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
 			[image unlockFocus];
-			[imV setImage:image];
-			[innerView addSubview:imV];
+			[handleImageView setImage:image];
+			[innerView addSubview:handleImageView];
 		}
 	} else {
 	}
@@ -257,16 +261,44 @@
 	CGFloat realItemHeight = [theComboBox itemHeight] + [theComboBox intercellSpacing].height;
 	if (fabs(draggingBasisY - newY) > realItemHeight/2) {
 		// if we're more than half-way to a change of one item height, then we actually resize
-		CGFloat delta_y = realItemHeight * MAX(1 - [theComboBox numberOfVisibleItems],
-											   round((draggingBasisY - newY) / realItemHeight));
+		BOOL isAbove = [theComboBox isPopUpAbove];
+		
+		CGFloat delta_y;
+		if (isAbove) {
+			// the pop-up is above; don't let the y position move below a minimum of height 1 line
+			delta_y = realItemHeight * MIN([theComboBox numberOfVisibleItems] - 1,
+												   round((draggingBasisY - newY) / realItemHeight));
+		} else {
+			// the pop-up is not above; don't let the y position move above a minimum of height 1 line
+			delta_y = realItemHeight * MAX(1 - [theComboBox numberOfVisibleItems],
+												   round((draggingBasisY - newY) / realItemHeight));
+		}
 		draggingBasisY -= delta_y;
 		
 		NSWindow *popup = [self window];
 		NSRect windowFrame = [popup frame];
 		CGFloat previousHeight = windowFrame.size.height;
-		windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + realItemHeight);
-		delta_y = windowFrame.size.height - previousHeight;
-		windowFrame.origin.y -= delta_y;
+		
+		if (isAbove) {
+			// the pop-up is above
+			windowFrame.size.height = MAX(windowFrame.size.height - delta_y,RESIZE_HANDLE_HEIGHT + realItemHeight);
+			IGResizableComboBoxPopUpHandleImageView *handleImageView = nil;
+			for (NSView *aView in [self subviews]) {
+				if ([aView isKindOfClass:[IGResizableComboBoxPopUpHandleImageView class]]) {
+					handleImageView = (IGResizableComboBoxPopUpHandleImageView *)aView;
+				}
+			}
+			if (handleImageView) {
+				NSRect handleImageViewFrame = [handleImageView frame];
+				handleImageViewFrame.origin.y += windowFrame.size.height - previousHeight;
+				[handleImageView setFrame:handleImageViewFrame];
+			}
+		} else {
+			// the pop-up is not above
+			windowFrame.size.height = MAX(windowFrame.size.height + delta_y,RESIZE_HANDLE_HEIGHT + realItemHeight);
+			windowFrame.origin.y -= windowFrame.size.height - previousHeight;
+		}
+		
 		[popup setFrame:windowFrame display:YES];
 		
 		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/realItemHeight);
