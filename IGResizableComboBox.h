@@ -34,9 +34,15 @@
 #import <Cocoa/Cocoa.h>
 
 
+@class IGResizableComboBoxPopUpContentView;
+
 @interface IGResizableComboBox : NSComboBox {
+@public
 	BOOL isPopUpOpen;
 	NSString *numberOfVisibleItemsAutosaveName;
+	
+@private
+	IGResizableComboBoxPopUpContentView *innerView;
 }
 
 @property BOOL isPopUpOpen;

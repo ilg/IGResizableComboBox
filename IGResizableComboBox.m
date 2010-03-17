@@ -33,15 +33,29 @@
 
 #import "IGResizableComboBox.h"
 
-#define RESIZE_HANDLE_HEIGHT 5
+#define RESIZE_HANDLE_HEIGHT 7.0
+
+#define RESIZE_HANDLE_IMAGE_HEIGHT 1.0
+#define RESIZE_HANDLE_IMAGE_WIDTH 30.0
 
 #pragma mark -
 #pragma mark Private helper class's interface
+
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	NSComboBox *theComboBox;
+	
+	CGFloat draggingBasisY;
+	BOOL draggingNow;
 }
 
 @property(retain) NSComboBox *theComboBox;
+
+//<#methods#>
+
+@end
+
+@interface IGResizableComboBoxPopUpHandleImageView : NSImageView {
+}
 
 //<#methods#>
 
@@ -54,8 +68,6 @@
 @implementation IGResizableComboBox
 
 @synthesize isPopUpOpen;
-
-IGResizableComboBoxPopUpContentView *innerView;
 
 - (id)initWithFrame:(NSRect)frame {
 //	NSLog(@"initWithFrame:");
@@ -145,6 +157,29 @@ IGResizableComboBoxPopUpContentView *innerView;
 			[child setContentView:innerView];
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
+			
+			IGResizableComboBoxPopUpHandleImageView *imV;
+			imV = [[[IGResizableComboBoxPopUpHandleImageView alloc]
+					initWithFrame:NSMakeRect(0.0, 0.0,
+											 windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
+				   autorelease];
+			NSImage *image = [[[NSImage alloc]
+							   initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
+							  autorelease];
+			[image lockFocus];
+			[[NSColor controlShadowColor] set];
+			[NSBezierPath fillRect:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2,
+											  (RESIZE_HANDLE_HEIGHT - RESIZE_HANDLE_IMAGE_HEIGHT)/2,
+											  RESIZE_HANDLE_IMAGE_WIDTH,
+											  RESIZE_HANDLE_IMAGE_HEIGHT)];
+			[[NSColor headerColor] set];
+			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, 0.0)
+									  toPoint:NSMakePoint(windowFrame.size.width, 0.0)];
+			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, RESIZE_HANDLE_HEIGHT)
+									  toPoint:NSMakePoint(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+			[image unlockFocus];
+			[imV setImage:image];
+			[innerView addSubview:imV];
 		}
 	} else {
 	}
@@ -189,12 +224,7 @@ IGResizableComboBoxPopUpContentView *innerView;
 
 @implementation IGResizableComboBoxPopUpContentView
 
-#define SIGNUM(f) ((f) / fabs(f))
-
 @synthesize theComboBox;
-
-CGFloat draggingBasisY;
-BOOL draggingNow;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
@@ -226,8 +256,9 @@ BOOL draggingNow;
 	CGFloat newY = [NSEvent mouseLocation].y;
 	CGFloat realItemHeight = [theComboBox itemHeight] + [theComboBox intercellSpacing].height;
 	if (fabs(draggingBasisY - newY) > realItemHeight/2) {
-		// if we're a bit more than half-way to a change of one item height, then we actually resize
-		CGFloat delta_y = SIGNUM(draggingBasisY - newY) * realItemHeight;
+		// if we're more than half-way to a change of one item height, then we actually resize
+		CGFloat delta_y = realItemHeight * MAX(1 - [theComboBox numberOfVisibleItems],
+											   round((draggingBasisY - newY) / realItemHeight));
 		draggingBasisY -= delta_y;
 		
 		NSWindow *popup = [self window];
@@ -241,6 +272,25 @@ BOOL draggingNow;
 		NSInteger newNumberOfVisibleItems = round((windowFrame.size.height - RESIZE_HANDLE_HEIGHT)/realItemHeight);
 		[theComboBox setNumberOfVisibleItems:newNumberOfVisibleItems];
 	}
+}
+
+@end
+
+@implementation IGResizableComboBoxPopUpHandleImageView
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	[[self superview] mouseDown:theEvent];
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+	[[self superview] mouseUp:theEvent];
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+	[[self superview] mouseDragged:theEvent];
 }
 
 @end
