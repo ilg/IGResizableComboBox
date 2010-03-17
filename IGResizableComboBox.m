@@ -125,13 +125,19 @@ IGResizableComboBoxPopUpContentView *innerView;
 		NSWindow *child = [self comboBoxPopUpWindow];
 		if (child) {
 			NSRect windowFrame = [child frame];
-			NSLog(@"pop-up is %@",[self isPopUpBelow] ? @"below" : ([self isPopUpAbove] ? @"above" : @"neither above nor below"));
 			NSScrollView *scrollView = [child contentView];
 			NSRect scrollViewFrame = [scrollView frame];
 			
 			windowFrame.size.height += RESIZE_HANDLE_HEIGHT;
-			windowFrame.origin.y -= RESIZE_HANDLE_HEIGHT;
-			scrollViewFrame.origin.y += RESIZE_HANDLE_HEIGHT;
+			
+			if ([self isPopUpAbove]) {
+				// the pop-up is above
+			} else {
+				// the pop-up is not above
+				windowFrame.origin.y -= RESIZE_HANDLE_HEIGHT;
+				scrollViewFrame.origin.y += RESIZE_HANDLE_HEIGHT;
+			}
+
 			[child setFrame:windowFrame display:YES];
 			
 			innerView = [[IGResizableComboBoxPopUpContentView alloc] initWithFrame:scrollViewFrame];
