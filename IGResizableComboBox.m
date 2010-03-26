@@ -87,11 +87,11 @@
 //	NSLog(@"setting notifications...");
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(willPopUp:)
-												 name:@"NSComboBoxWillPopUpNotification"
+												 name:NSComboBoxWillPopUpNotification
 											   object:self];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(willDismiss:)
-												 name:@"NSComboBoxWillDismissNotification"
+												 name:NSComboBoxWillDismissNotification
 											   object:self];
 //	NSLog(@"done.");
 }
