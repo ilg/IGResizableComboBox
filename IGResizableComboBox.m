@@ -41,12 +41,14 @@
 
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	IGResizableComboBox *theComboBox;
+	NSScrollView *theScrollView;
 	
 	CGFloat draggingBasisY;
 	BOOL draggingNow;
 }
 
-@property(retain) NSComboBox *theComboBox;
+@property(retain) IGResizableComboBox *theComboBox;
+@property(retain) NSScrollView *theScrollView;
 
 //<#methods#>
 
@@ -157,6 +159,7 @@
 			
 			innerView = [[IGResizableComboBoxPopUpContentView alloc] initWithFrame:scrollViewFrame];
 			[innerView setTheComboBox:self];
+			[innerView setTheScrollView:scrollView];
 			[child setContentView:innerView];
 			[innerView addSubview:scrollView];
 			[scrollView setFrame:scrollViewFrame];
@@ -212,7 +215,7 @@
 
 - (void)willDismiss:(NSNotification *)notification
 {
-	NSScrollView *scrollView = [[innerView subviews] objectAtIndex:0];
+	NSScrollView *scrollView = [innerView theScrollView];
 	[[innerView window] setContentView:scrollView];
 //	NSLog(@"willDismiss:");
 	[self setIsPopUpOpen:NO];
@@ -227,6 +230,7 @@
 @implementation IGResizableComboBoxPopUpContentView
 
 @synthesize theComboBox;
+@synthesize theScrollView;
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
@@ -235,9 +239,27 @@
 		draggingBasisY = 0.0;
 		draggingNow = NO;
 		[self setTheComboBox:nil];
+		[self setTheScrollView:nil];
     }
     return self;
 }
+
+// to allow catching of calls that should go to our inner view
+- (id)forwardingTargetForSelector:(SEL)aSelector
+{
+	if (aSelector == @selector(verticalScroller)) {
+		return theScrollView;
+	}
+	if ([super respondsToSelector:@selector(forwardingTargetForSelector:)]) {
+		// cast to (id) to avoid "may not respond to selector" warning
+		return [(id)super forwardingTargetForSelector:aSelector];
+	} else {
+		[self doesNotRecognizeSelector:aSelector];
+		return nil;
+	}
+
+}
+
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
