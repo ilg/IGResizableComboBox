@@ -76,6 +76,7 @@
         // Initialization code here.
 		[self awakeFromNib];
 		[self setNumberOfVisibleItemsAutosaveName:nil];
+		isHandleDrawn = NO;
     }
     return self;
 }
@@ -129,62 +130,67 @@
 	return [self isPopUpOpen] && ![self isPopUpBelow];
 }
 
+- (void)drawHandle {
+	//		NSUInteger numberOfDisplayedLines = MIN([self numberOfVisibleItems],MAX(1,[self numberOfItems]));
+	NSWindow *child = [self comboBoxPopUpWindow];
+	if (child) {
+		NSRect windowFrame = [child frame];
+		NSScrollView *scrollView = [child contentView];
+		NSRect scrollViewFrame = [scrollView frame];
+		NSRect handleImageViewFrame;
+		
+		windowFrame.size.height += RESIZE_HANDLE_HEIGHT;
+		
+		if ([self isPopUpAbove]) {
+			// the pop-up is above
+			handleImageViewFrame = NSMakeRect(0.0, windowFrame.size.height - RESIZE_HANDLE_HEIGHT, // TODO: fix
+											  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
+		} else {
+			// the pop-up is not above
+			windowFrame.origin.y -= RESIZE_HANDLE_HEIGHT;
+			scrollViewFrame.origin.y += RESIZE_HANDLE_HEIGHT;
+			handleImageViewFrame = NSMakeRect(0.0, 0.0,
+											  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
+		}
+		
+		[child setFrame:windowFrame display:YES];
+		
+		innerView = [[IGResizableComboBoxPopUpContentView alloc] initWithFrame:scrollViewFrame];
+		[innerView setTheComboBox:self];
+		[child setContentView:innerView];
+		[innerView addSubview:scrollView];
+		[scrollView setFrame:scrollViewFrame];
+		
+		IGResizableComboBoxPopUpHandleImageView *handleImageView;
+		handleImageView = [[[IGResizableComboBoxPopUpHandleImageView alloc]
+							initWithFrame:handleImageViewFrame]
+						   autorelease];
+		NSImage *image = [[[NSImage alloc]
+						   initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
+						  autorelease];
+		[image lockFocus];
+		[[NSColor controlShadowColor] set];
+		[NSBezierPath fillRect:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2,
+										  (RESIZE_HANDLE_HEIGHT - RESIZE_HANDLE_IMAGE_HEIGHT)/2,
+										  RESIZE_HANDLE_IMAGE_WIDTH,
+										  RESIZE_HANDLE_IMAGE_HEIGHT)];
+		[[NSColor headerColor] set];
+		[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, 0.0)
+								  toPoint:NSMakePoint(windowFrame.size.width, 0.0)];
+		[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, RESIZE_HANDLE_HEIGHT)
+								  toPoint:NSMakePoint(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
+		[image unlockFocus];
+		[handleImageView setImage:image];
+		[innerView addSubview:handleImageView];
+	}
+	isHandleDrawn = YES;
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     // Drawing code here.
 	[super drawRect:dirtyRect];
-	if ([self isPopUpOpen]) {
-//		NSUInteger numberOfDisplayedLines = MIN([self numberOfVisibleItems],MAX(1,[self numberOfItems]));
-		NSWindow *child = [self comboBoxPopUpWindow];
-		if (child) {
-			NSRect windowFrame = [child frame];
-			NSScrollView *scrollView = [child contentView];
-			NSRect scrollViewFrame = [scrollView frame];
-			NSRect handleImageViewFrame;
-			
-			windowFrame.size.height += RESIZE_HANDLE_HEIGHT;
-			
-			if ([self isPopUpAbove]) {
-				// the pop-up is above
-				handleImageViewFrame = NSMakeRect(0.0, windowFrame.size.height - RESIZE_HANDLE_HEIGHT, // TODO: fix
-												  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
-			} else {
-				// the pop-up is not above
-				windowFrame.origin.y -= RESIZE_HANDLE_HEIGHT;
-				scrollViewFrame.origin.y += RESIZE_HANDLE_HEIGHT;
-				handleImageViewFrame = NSMakeRect(0.0, 0.0,
-												  windowFrame.size.width, RESIZE_HANDLE_HEIGHT);
-			}
-
-			[child setFrame:windowFrame display:YES];
-			
-			innerView = [[IGResizableComboBoxPopUpContentView alloc] initWithFrame:scrollViewFrame];
-			[innerView setTheComboBox:self];
-			[child setContentView:innerView];
-			[innerView addSubview:scrollView];
-			[scrollView setFrame:scrollViewFrame];
-			
-			IGResizableComboBoxPopUpHandleImageView *handleImageView;
-			handleImageView = [[[IGResizableComboBoxPopUpHandleImageView alloc]
-								initWithFrame:handleImageViewFrame]
-							   autorelease];
-			NSImage *image = [[[NSImage alloc]
-							   initWithSize:NSMakeSize(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)]
-							  autorelease];
-			[image lockFocus];
-			[[NSColor controlShadowColor] set];
-			[NSBezierPath fillRect:NSMakeRect((windowFrame.size.width - RESIZE_HANDLE_IMAGE_WIDTH)/2,
-											  (RESIZE_HANDLE_HEIGHT - RESIZE_HANDLE_IMAGE_HEIGHT)/2,
-											  RESIZE_HANDLE_IMAGE_WIDTH,
-											  RESIZE_HANDLE_IMAGE_HEIGHT)];
-			[[NSColor headerColor] set];
-			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, 0.0)
-									  toPoint:NSMakePoint(windowFrame.size.width, 0.0)];
-			[NSBezierPath strokeLineFromPoint:NSMakePoint(0.0, RESIZE_HANDLE_HEIGHT)
-									  toPoint:NSMakePoint(windowFrame.size.width, RESIZE_HANDLE_HEIGHT)];
-			[image unlockFocus];
-			[handleImageView setImage:image];
-			[innerView addSubview:handleImageView];
-		}
+	if ([self isPopUpOpen] && !isHandleDrawn) {
+		[self drawHandle];
 	} else {
 	}
 }
@@ -218,6 +224,7 @@
 	[[innerView window] setContentView:scrollView];
 //	NSLog(@"willDismiss:");
 	[self setIsPopUpOpen:NO];
+	isHandleDrawn = NO;
 }
 
 @end

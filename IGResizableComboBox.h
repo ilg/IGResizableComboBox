@@ -43,6 +43,7 @@
 	
 @private
 	IGResizableComboBoxPopUpContentView *innerView;
+	BOOL isHandleDrawn;
 }
 
 @property BOOL isPopUpOpen;
