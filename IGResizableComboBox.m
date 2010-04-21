@@ -157,6 +157,7 @@
 		
 		innerView = [[IGResizableComboBoxPopUpContentView alloc] initWithFrame:scrollViewFrame];
 		[innerView setTheComboBox:self];
+		[innerView setTheScrollView:scrollView];
 		[child setContentView:innerView];
 		[innerView addSubview:scrollView];
 		[scrollView setFrame:scrollViewFrame];
