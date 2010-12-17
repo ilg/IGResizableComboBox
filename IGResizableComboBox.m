@@ -39,6 +39,13 @@
 #pragma mark -
 #pragma mark Private helper class's interface
 
+// this interface-only section avoids the "may not respond to selector" warning
+// in IGResizableComboBoxPopUpContentView's forwardingTargetForSelector:
+@interface NSView (forwardingTargetForSelector)
+- (id) forwardingTargetForSelector:(SEL)selector;
+@end
+
+
 @interface IGResizableComboBoxPopUpContentView : NSView {
 	IGResizableComboBox *theComboBox;
 	NSScrollView *theScrollView;
@@ -200,7 +207,8 @@
 {
 	[super setNumberOfVisibleItems:visibleItems];
 	if (numberOfVisibleItemsAutosaveName) {
-		[[NSUserDefaults standardUserDefaults] setInteger:visibleItems forKey:numberOfVisibleItemsAutosaveName];
+		[[NSUserDefaults standardUserDefaults] setInteger:visibleItems
+												   forKey:numberOfVisibleItemsAutosaveName];
 	}
 }
 
@@ -209,7 +217,8 @@
 //	NSLog(@"changing combobox length autosave name from '%@' to '%@'",numberOfVisibleItemsAutosaveName,name);
 	[numberOfVisibleItemsAutosaveName release];
 	numberOfVisibleItemsAutosaveName = [name copy];
-	[self setNumberOfVisibleItems:[[NSUserDefaults standardUserDefaults] integerForKey:numberOfVisibleItemsAutosaveName]];
+	[self setNumberOfVisibleItems:[[NSUserDefaults standardUserDefaults]
+								   integerForKey:numberOfVisibleItemsAutosaveName]];
 }
 
 
@@ -258,8 +267,7 @@
 		return theScrollView;
 	}
 	if ([super respondsToSelector:@selector(forwardingTargetForSelector:)]) {
-		// cast to (id) to avoid "may not respond to selector" warning
-		return [(id)super forwardingTargetForSelector:aSelector];
+		return [super forwardingTargetForSelector:aSelector];
 	} else {
 		[self doesNotRecognizeSelector:aSelector];
 		return nil;
