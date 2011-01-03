@@ -1,6 +1,6 @@
 /*********************************************************************************
  
- © Copyright 2010, Isaac Greenspan
+ © Copyright 2010-2011, Isaac Greenspan
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -124,7 +124,7 @@
 		CGFloat popUpTopInScreenY = popUpFrame.origin.y + popUpFrame.size.height;
 		NSPoint selfOriginInSelf = [self bounds].origin;
 		NSPoint selfOriginInWindow = [self convertPoint:selfOriginInSelf
-												 toView:[[self window] contentView]];
+												 toView:nil];
 		CGFloat selfOriginInScreenY = [[self window] convertBaseToScreen:selfOriginInWindow].y;
 		return (popUpTopInScreenY < selfOriginInScreenY);
 	} else {

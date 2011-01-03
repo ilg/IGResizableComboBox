@@ -16,7 +16,7 @@ IGResizableComboBox inserts its own NSView subclass as the content view of the N
 
 ----
 
- © Copyright 2010, Isaac Greenspan
+ © Copyright 2010-2011, Isaac Greenspan
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
